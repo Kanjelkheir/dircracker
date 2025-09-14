@@ -1,11 +1,14 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
 	"strings"
 )
+
+var ErrNotFound = errors.New("not found")
 
 func ReadWordList(fileName *string) (string, error) {
 	content, err := os.ReadFile(*fileName)
@@ -26,11 +29,18 @@ func ReadWordList(fileName *string) (string, error) {
 }
 
 func ReturnDirectories(content string) []string {
-	return strings.Split(content, "\n")
+	lines := strings.Split(content, "\n")
+	var answer []string
+	for _, line := range lines {
+		if strings.HasPrefix(line, "/") {
+			answer = append(answer, line)
+		}
+	}
+
+	return answer
 }
 
-func CheckDirectory(link, directory string) (bool, error) {
-	url := link + directory
+func CheckDirectory(url string) (bool, error) {
 	// initialize a new get request
 	request, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -45,7 +55,7 @@ func CheckDirectory(link, directory string) (bool, error) {
 	}
 
 	if response.StatusCode == http.StatusNotFound {
-		return false, fmt.Errorf("not found")
+		return false, ErrNotFound
 	}
 
 	return true, nil

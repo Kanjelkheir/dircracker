@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -36,15 +37,20 @@ func main() {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			success, err := utils.CheckDirectory(*target, directory)
 			url := *target + directory
-			if err != nil {
-				fmt.Printf("%s not found! - %v\n", url, err)
+			success, err := utils.CheckDirectory(url)
+			if success {
+				fmt.Printf("%s found!\n", url)
 			} else {
-
-				if success == true {
-					fmt.Printf("%s found!\n", url)
+				if err != nil {
+					if errors.Is(err, utils.ErrNotFound) {
+						fmt.Printf("%s not found!\n", url)
+					} else {
+						fmt.Printf("%s not found! - %v\n", url, err)
+					}
 				} else {
+					// This case should ideally not be reached if CheckDirectory always returns an error when success is false.
+					// However, if it does happen, it implies the directory was not found.
 					fmt.Printf("%s not found!\n", url)
 				}
 			}
@@ -53,7 +59,4 @@ func main() {
 
 	wg.Wait()
 
-	fmt.Println(content)
-
-	fmt.Println(*wordlist, *target)
 }

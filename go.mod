@@ -1,5 +1,5 @@
 module github.com/kanjelkheir/dircracker
 
-go 1.24.4
+go 1.22.0
 
-require github.com/akamensky/argparse v1.4.0 // indirect
+require github.com/akamensky/argparse v1.4.0
